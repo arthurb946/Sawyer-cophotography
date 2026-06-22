@@ -189,8 +189,8 @@
     /* Close button */
     .menu-close {
       position: absolute;
-      top: 28px;
-      right: 48px;
+      top: 32px;
+      right: 52px;
       width: 44px;
       height: 44px;
       display: flex;
@@ -200,6 +200,7 @@
       background: none;
       border: none;
       padding: 0;
+      z-index: 10;
     }
 
     .menu-close span {
@@ -220,7 +221,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 80px 64px 52px;
+      padding: 100px 72px 56px;
     }
 
     /* Nav links */
@@ -234,7 +235,7 @@
       display: flex;
       align-items: baseline;
       gap: 24px;
-      padding: 20px 0;
+      padding: 28px 0;
       border-bottom: 1px solid rgba(255,255,255,0.06);
       text-decoration: none;
       color: var(--text);
@@ -609,6 +610,24 @@
       font-style: italic;
     }
 
+    /* Progress bar for horizontal scroll */
+    .portfolio-progress {
+      height: 1px;
+      background: var(--border);
+      margin: 0 48px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portfolio-progress-fill {
+      position: absolute;
+      top: 0; left: 0;
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.1s linear;
+    }
+
     /* Drag hint */
     .drag-hint {
       display: flex;
@@ -642,51 +661,66 @@
       margin: 0 auto;
     }
 
-    /* Mask reveal photo stack */
+    /* ─── MASK REVEAL: Lando-style ──────────────────────────────────────── */
     .about-photo-stack {
       position: relative;
       aspect-ratio: 3/4;
       border-radius: 3px;
       overflow: hidden;
-      cursor: crosshair;
+      cursor: none; /* hide system cursor — we use a custom one */
     }
 
+    /* Back image: Jay shooting (visible by default) */
     .photo-back {
       position: absolute;
       inset: 0;
       object-fit: cover;
+      object-position: center top;
       width: 100%;
       height: 100%;
-      filter: brightness(0.8) saturate(0.85);
+      filter: brightness(0.78) saturate(0.9);
     }
 
+    /* Front image: portrait (revealed through the moving circle) */
     .photo-front {
       position: absolute;
       inset: 0;
       object-fit: cover;
+      object-position: center top;
       width: 100%;
       height: 100%;
-      filter: brightness(0.75);
-      /* Circular reveal mask that expands on hover */
-      clip-path: circle(100% at 50% 50%);
-      transition: clip-path 0.7s var(--ease-out);
+      filter: brightness(0.82);
+      /* clip-path controlled entirely by JS — starts as nothing visible */
+      clip-path: circle(0px at 50% 50%);
+      will-change: clip-path;
     }
 
-    .photo-mask-overlay {
-      position: absolute;
-      inset: 0;
-      background: transparent;
-      z-index: 3;
+    /* Custom swoosh cursor element */
+    .reveal-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 80px;
+      height: 80px;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.25s ease;
+      will-change: transform;
     }
 
-    /* JS drives the clip-path based on mouse position */
-    .about-photo-stack .photo-front {
-      clip-path: circle(100% at 50% 50%);
-      transition: clip-path 0.6s var(--ease-out);
+    .reveal-cursor.active { opacity: 1; }
+
+    .reveal-cursor svg {
+      width: 100%;
+      height: 100%;
+      animation: cursorSpin 3s linear infinite;
     }
 
-    .about-photo-stack:hover .photo-front {
-      clip-path: circle(0% at var(--mx, 50%) var(--my, 50%));
+    @keyframes cursorSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
     }
 
     .about-photo-label {
@@ -697,9 +731,12 @@
       font-size: 0.65rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(240,235,224,0.5);
+      color: rgba(240,235,224,0.4);
       pointer-events: none;
+      transition: opacity 0.3s ease;
     }
+
+    .about-photo-stack:hover .about-photo-label { opacity: 0; }
 
     .about-text { }
 
@@ -806,7 +843,7 @@
     /* ─── CONTACT ────────────────────────────────────────────────────────── */
     #contact {
       background: var(--bg);
-      padding: 100px 48px 80px;
+      padding: 100px 48px 0;
     }
 
     .contact-grid {
@@ -1171,6 +1208,10 @@
       <div class="drag-hint-line"></div>
       <span>Drag to explore</span>
     </div>
+
+    <div class="portfolio-progress">
+      <div class="portfolio-progress-fill" id="portfolio-progress-fill"></div>
+    </div>
   </section>
 
   <!-- ═══ ABOUT ════════════════════════════════════════════════════════════ -->
@@ -1178,11 +1219,10 @@
     <div class="about-grid">
 
       <div class="about-photo-stack" id="photo-stack">
-        <!-- Back photo: Jay at work (atmospheric) -->
-        <img class="photo-back" src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?w=900&q=85" alt="Jay Sawyer at work" loading="lazy">
-        <!-- Front photo: Jay portrait — hover reveals the back -->
-        <img class="photo-front" id="photo-front" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=85" alt="Jacob Sawyer, photographer" loading="lazy">
-        <div class="photo-mask-overlay" id="photo-mask-overlay"></div>
+        <!-- Back: Jay shooting on the clifftop — mysterious, face hidden -->
+        <img class="photo-back" src="jay-shooting.jpeg" alt="Jacob Sawyer shooting on location" loading="lazy">
+        <!-- Front: Portrait — revealed as cursor moves -->
+        <img class="photo-front" id="photo-front" src="jay-portrait.jpeg" alt="Jacob Sawyer, photographer" loading="lazy">
         <p class="about-photo-label">Hover to reveal</p>
       </div>
 
@@ -1435,8 +1475,53 @@
       if (e.key === 'Escape' && menuOverlay.classList.contains('open')) closeMenu();
     });
 
-    /* ── HORIZONTAL DRAG SCROLL ── */
+    /* ── HORIZONTAL SCROLL: intercept vertical wheel → horizontal movement ── */
+    const portfolioSection = document.getElementById('portfolio');
     const track = document.getElementById('portfolio-track');
+    let isHorizontalScrolling = false;
+    let scrollTimeout;
+
+    // Wheel intercept — when user scrolls down over portfolio, move track right instead
+    portfolioSection.addEventListener('wheel', (e) => {
+      // Only intercept if track has scrollable content
+      const maxScroll = track.scrollWidth - track.clientWidth;
+      if (maxScroll <= 0) return;
+
+      const atStart = track.scrollLeft <= 0;
+      const atEnd   = track.scrollLeft >= maxScroll - 2;
+
+      // If scrolling up and track is at start, let page scroll normally
+      if (e.deltaY < 0 && atStart) return;
+      // If scrolling down and track is at end, let page scroll normally
+      if (e.deltaY > 0 && atEnd) return;
+
+      // Otherwise eat the event and redirect to horizontal
+      e.preventDefault();
+      track.scrollLeft += e.deltaY * 1.2;
+    }, { passive: false });
+
+    // Touch swipe for mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    portfolioSection.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    portfolioSection.addEventListener('touchmove', (e) => {
+      const dx = touchStartX - e.touches[0].clientX;
+      const dy = touchStartY - e.touches[0].clientY;
+      // Only intercept if horizontal swipe is dominant
+      if (Math.abs(dx) > Math.abs(dy)) {
+        e.preventDefault();
+        track.scrollLeft += dx * 0.8;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: false });
+
+    /* ── DRAG SCROLL (mouse) ── */
     let isDown = false, startX, scrollLeft;
 
     track.addEventListener('mousedown', e => {
@@ -1461,17 +1546,62 @@
       track.scrollLeft = scrollLeft - walk;
     });
 
-    /* ── ABOUT: mouse-tracked mask reveal ── */
-    const stack = document.getElementById('photo-stack');
-    const photoFront = stack.querySelector('.photo-front');
+    // Progress bar
+    const progressFill = document.getElementById('portfolio-progress-fill');
+    track.addEventListener('scroll', () => {
+      const max = track.scrollWidth - track.clientWidth;
+      const pct = max > 0 ? (track.scrollLeft / max) * 100 : 0;
+      if (progressFill) progressFill.style.width = `${pct}%`;
+    }, { passive: true });
 
-    stack.addEventListener('mousemove', e => {
-      const rect = stack.getBoundingClientRect();
-      const mx = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
-      const my = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
-      stack.style.setProperty('--mx', `${mx}%`);
-      stack.style.setProperty('--my', `${my}%`);
+    /* ── ABOUT: Lando-style cursor-tracked mask reveal ── */
+    const stack        = document.getElementById('photo-stack');
+    const photoFront   = document.getElementById('photo-front');
+    const revealCursor = document.getElementById('reveal-cursor');
+
+    const CIRCLE_RADIUS = 120; // px — diameter of the reveal window
+    let mouseX = 0, mouseY = 0;
+    let cursorX = 0, cursorY = 0;
+    let maskX = 0, maskY = 0;
+    let isOverStack = false;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    }, { passive: true });
+
+    stack.addEventListener('mouseenter', () => {
+      isOverStack = true;
+      revealCursor.classList.add('active');
     });
+
+    stack.addEventListener('mouseleave', () => {
+      isOverStack = false;
+      revealCursor.classList.remove('active');
+      // Close the circle where it was last
+      photoFront.style.clipPath = `circle(0px at ${maskX}px ${maskY}px)`;
+    });
+
+    function rafLoop() {
+      // Smooth cursor with lerp — slight lag makes it feel weighted
+      cursorX += (mouseX - cursorX) * 0.1;
+      cursorY += (mouseY - cursorY) * 0.1;
+
+      revealCursor.style.transform = `translate(${cursorX - 40}px, ${cursorY - 40}px)`;
+
+      if (isOverStack) {
+        const rect = stack.getBoundingClientRect();
+        maskX = mouseX - rect.left;
+        maskY = mouseY - rect.top;
+        // Set clip-path: circle at cursor position within the element
+        photoFront.style.transition = 'none';
+        photoFront.style.clipPath = `circle(${CIRCLE_RADIUS}px at ${maskX}px ${maskY}px)`;
+      }
+
+      requestAnimationFrame(rafLoop);
+    }
+
+    rafLoop();
 
     /* ── SCROLL REVEAL ── */
     const revealObserver = new IntersectionObserver((entries) => {
@@ -1533,6 +1663,20 @@
       this.style.color = 'var(--text)';
     });
   </script>
+  <!-- Custom cursor for mask reveal -->
+  <div class="reveal-cursor" id="reveal-cursor">
+    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Spinning text ring -->
+      <defs>
+        <path id="circle-path" d="M 40,40 m -28,0 a 28,28 0 1,1 56,0 a 28,28 0 1,1 -56,0"/>
+      </defs>
+      <text font-family="'DM Sans', sans-serif" font-size="7.5" font-weight="400" letter-spacing="3.2" fill="rgba(240,235,224,0.85)">
+        <textPath href="#circle-path">REVEAL · REVEAL · REVEAL ·</textPath>
+      </text>
+      <!-- Centre dot -->
+      <circle cx="40" cy="40" r="2.5" fill="rgba(196,169,125,0.9)"/>
+    </svg>
+  </div>
 
 </body>
 </html>
