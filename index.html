@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sawyer & Co — Hospitality Photography, North West England</title>
+  <meta name="description" content="Atmospheric photography for restaurants and cafes in the North West of England. Jacob Sawyer captures the character of independent hospitality.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ─── TOKENS ─────────────────────────────────────────────────────────── */
+    :root {
+      --bg:           #0c0b09;
+      --surface:      #161410;
+      --text:         #f0ebe0;
+      --muted:        #7a7268;
+      --accent:       #9a8060;
+      --accent-light: #c4a97d;
+      --border:       rgba(255,255,255,0.07);
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out:  cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    /* ─── RESET ──────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ─── NAVIGATION ─────────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 48px;
+      transition: padding 0.5s var(--ease-out), background 0.5s ease, backdrop-filter 0.5s ease;
+    }
+
+    nav.scrolled {
+      padding: 18px 48px;
+      background: rgba(12, 11, 9, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      /* Invisible placeholder — keeps nav layout space. Real logo is the morphing element. */
+      visibility: hidden;
+    }
+
+    /* Hero nav links with 3D flip on hover */
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      list-style: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .nav-links.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+    }
+
+    .nav-links a {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(240,235,224,0.75);
+      display: inline-block;
+      position: relative;
+      perspective: 400px;
+      overflow: hidden;
+      height: 1.1em;
+    }
+
+    .nav-links a span {
+      display: block;
+      transition: transform 0.35s var(--ease-out);
+      transform-origin: top center;
+      backface-visibility: hidden;
+    }
+
+    .nav-links a::after {
+      content: attr(data-label);
+      position: absolute;
+      top: 0; left: 0;
+      transform: rotateX(-90deg) translateY(-100%);
+      transform-origin: bottom center;
+      display: block;
+      transition: transform 0.35s var(--ease-out);
+      color: var(--accent-light);
+    }
+
+    .nav-links a:hover span { transform: rotateX(90deg) translateY(100%); }
+    .nav-links a:hover::after { transform: rotateX(0deg) translateY(0); }
+
+    /* Hamburger pill */
+    .nav-hamburger {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease, background 0.2s ease;
+      transform: translateY(-6px);
+    }
+
+    .nav-hamburger.visible {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    .nav-hamburger:hover { background: rgba(255,255,255,0.06); }
+
+    .hamburger-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hamburger-lines span {
+      display: block;
+      width: 16px;
+      height: 1px;
+      background: var(--text);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* Mobile menu overlay */
+    .menu-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      background: rgba(12, 11, 9, 0.97);
+      backdrop-filter: blur(24px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .menu-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .menu-overlay a {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      opacity: 0.15;
+      transition: opacity 0.3s ease, color 0.3s ease;
+    }
+
+    .menu-overlay a:hover { opacity: 1; color: var(--accent-light); }
+
+    /* ─── MORPHING WORDMARK ──────────────────────────────────────────────── */
+    .wordmark {
+      position: fixed;
+      z-index: 200;
+      font-family: var(--font-display);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      pointer-events: none;
+      will-change: transform, font-size, opacity;
+      /* Start: hero centre position — JS overrides with inline style */
+      transform-origin: left center;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .wordmark.interactive { pointer-events: all; }
+    .wordmark:hover { color: var(--accent-light); }
+
+    /* ─── CHAPTER SCROLL SYSTEM ──────────────────────────────────────────── */
+    .chapter {
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* ─── HERO ───────────────────────────────────────────────────────────── */
+    #hero {
+      height: 100vh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800&q=85');
+      background-size: cover;
+      background-position: center 30%;
+      transform: scale(1.08);
+      animation: kenburns 14s ease forwards;
+      filter: brightness(0.52);
+    }
+
+    /* Use Jay's actual restaurant photo as hero bg - replaced inline via JS */
+    @keyframes kenburns {
+      from { transform: scale(1.08); }
+      to   { transform: scale(1.0); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 24px;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      margin-bottom: 28px;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.8s var(--ease-out) 0.3s forwards;
+    }
+
+    .hero-headline {
+      font-family: var(--font-display);
+      font-size: clamp(4.2rem, 12vw, 11rem);
+      font-weight: 300;
+      line-height: 0.95;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 1s var(--ease-out) 0.6s forwards;
+    }
+
+    .hero-headline em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--accent-light);
+    }
+
+    .hero-sub {
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 300;
+      letter-spacing: 0.04em;
+      color: rgba(240,235,224,0.55);
+      margin-top: 32px;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeUp 0.8s var(--ease-out) 1s forwards;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      animation: fadeUp 0.8s var(--ease-out) 1.4s forwards;
+    }
+
+    .hero-scroll span {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, var(--muted), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(0.7); }
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── SECTION TRANSITIONS ─────────────────────────────────────────────── */
+    .section-transition {
+      height: 120px;
+      background: linear-gradient(to bottom, var(--bg), var(--surface));
+    }
+
+    .section-transition.reverse {
+      background: linear-gradient(to bottom, var(--surface), var(--bg));
+    }
+
+    /* ─── PORTFOLIO ──────────────────────────────────────────────────────── */
+    #portfolio {
+      background: var(--surface);
+      padding: 100px 0 80px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 0 48px;
+      margin-bottom: 56px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 4vw, 3.8rem);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .section-title em {
+      font-style: italic;
+      color: var(--accent-light);
+    }
+
+    .portfolio-count {
+      font-family: var(--font-display);
+      font-size: 4rem;
+      font-weight: 300;
+      color: var(--border);
+      line-height: 1;
+    }
+
+    /* Horizontal scroll track */
+    .portfolio-track-wrapper {
+      position: relative;
+      cursor: grab;
+    }
+
+    .portfolio-track-wrapper:active { cursor: grabbing; }
+
+    .portfolio-track {
+      display: flex;
+      gap: 20px;
+      padding: 0 48px 48px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      user-select: none;
+    }
+
+    .portfolio-track::-webkit-scrollbar { display: none; }
+
+    .portfolio-item {
+      flex: 0 0 auto;
+      width: clamp(280px, 38vw, 560px);
+      scroll-snap-align: start;
+      position: relative;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .portfolio-img {
+      width: 100%;
+      height: 72vh;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.8s var(--ease-out), filter 0.6s ease;
+      filter: brightness(0.88) saturate(0.92);
+      will-change: transform;
+    }
+
+    .portfolio-item:hover .portfolio-img {
+      transform: scale(1.04);
+      filter: brightness(0.95) saturate(1.05);
+    }
+
+    .portfolio-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 40px 24px 24px;
+      background: linear-gradient(to top, rgba(8,7,5,0.85) 0%, transparent 100%);
+      transform: translateY(6px);
+      opacity: 0;
+      transition: opacity 0.4s ease, transform 0.4s var(--ease-out);
+    }
+
+    .portfolio-item:hover .portfolio-caption {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .portfolio-caption-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      margin-bottom: 4px;
+    }
+
+    .portfolio-caption-name {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 400;
+      font-style: italic;
+    }
+
+    /* Drag hint */
+    .drag-hint {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 48px;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .drag-hint-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ─── ABOUT ──────────────────────────────────────────────────────────── */
+    #about {
+      background: var(--bg);
+      padding: 120px 48px;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Mask reveal photo stack */
+    .about-photo-stack {
+      position: relative;
+      aspect-ratio: 3/4;
+      border-radius: 3px;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    .photo-back {
+      position: absolute;
+      inset: 0;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      filter: brightness(0.8) saturate(0.85);
+    }
+
+    .photo-front {
+      position: absolute;
+      inset: 0;
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      filter: brightness(0.75);
+      /* Circular reveal mask that expands on hover */
+      clip-path: circle(100% at 50% 50%);
+      transition: clip-path 0.7s var(--ease-out);
+    }
+
+    .photo-mask-overlay {
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      z-index: 3;
+    }
+
+    /* JS drives the clip-path based on mouse position */
+    .about-photo-stack .photo-front {
+      clip-path: circle(100% at 50% 50%);
+      transition: clip-path 0.6s var(--ease-out);
+    }
+
+    .about-photo-stack:hover .photo-front {
+      clip-path: circle(0% at var(--mx, 50%) var(--my, 50%));
+    }
+
+    .about-photo-label {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      z-index: 4;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(240,235,224,0.5);
+      pointer-events: none;
+    }
+
+    .about-text { }
+
+    .about-text .section-label { margin-bottom: 20px; }
+
+    .about-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3.5vw, 3.2rem);
+      font-weight: 300;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 32px;
+    }
+
+    .about-title em {
+      font-style: italic;
+      color: var(--accent-light);
+    }
+
+    .about-body {
+      font-size: 0.95rem;
+      font-weight: 300;
+      line-height: 1.75;
+      color: rgba(240,235,224,0.65);
+      margin-bottom: 24px;
+    }
+
+    .about-stat-row {
+      display: flex;
+      gap: 40px;
+      margin-top: 40px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+
+    .about-stat { }
+
+    .about-stat-num {
+      font-family: var(--font-display);
+      font-size: 2.6rem;
+      font-weight: 300;
+      line-height: 1;
+      color: var(--accent-light);
+    }
+
+    .about-stat-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ─── TESTIMONIALS ───────────────────────────────────────────────────── */
+    #testimonials {
+      background: var(--surface);
+      padding: 100px 48px;
+    }
+
+    .testimonials-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .testimonial-quote {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 2.8vw, 2.4rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.45;
+      color: var(--text);
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .testimonial-quote::before {
+      content: '\201C';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 6rem;
+      line-height: 1;
+      color: var(--accent);
+      opacity: 0.25;
+      font-family: var(--font-display);
+    }
+
+    .testimonial-author {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+    }
+
+    .testimonial-venue {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ─── CONTACT ────────────────────────────────────────────────────────── */
+    #contact {
+      background: var(--bg);
+      padding: 100px 48px 80px;
+    }
+
+    .contact-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 100px;
+      align-items: start;
+    }
+
+    .contact-left { }
+
+    .contact-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 4vw, 3.8rem);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 24px;
+    }
+
+    .contact-body {
+      font-size: 0.88rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: rgba(240,235,224,0.5);
+      margin-bottom: 36px;
+    }
+
+    .contact-detail {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.82rem;
+      color: rgba(240,235,224,0.6);
+      margin-bottom: 10px;
+    }
+
+    .contact-detail svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--accent);
+      fill: none;
+      stroke-width: 1.5;
+      flex-shrink: 0;
+    }
+
+    .contact-detail a:hover { color: var(--accent-light); }
+
+    /* Form */
+    .contact-form { }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-field label {
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .form-field input,
+    .form-field textarea {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 300;
+      outline: none;
+      transition: border-color 0.25s ease, background 0.25s ease;
+      width: 100%;
+    }
+
+    .form-field input::placeholder,
+    .form-field textarea::placeholder { color: rgba(122,114,104,0.6); }
+
+    .form-field input:focus,
+    .form-field textarea:focus {
+      border-color: var(--accent);
+      background: rgba(154,128,96,0.06);
+    }
+
+    .form-field textarea {
+      height: 130px;
+      resize: none;
+    }
+
+    .form-submit {
+      width: 100%;
+      margin-top: 14px;
+      padding: 15px 24px;
+      background: var(--text);
+      color: var(--bg);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.25s ease, transform 0.2s ease;
+    }
+
+    .form-submit:hover {
+      background: var(--accent-light);
+      transform: translateY(-1px);
+    }
+
+    .form-submit:active { transform: translateY(0); }
+
+    /* ─── FOOTER ─────────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg);
+    }
+
+    .footer-brand {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .footer-copy {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      color: rgba(122,114,104,0.5);
+    }
+
+    .footer-designed {
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: rgba(122,114,104,0.3);
+    }
+
+    /* ─── REVEAL ANIMATIONS ──────────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.75s var(--ease-out), transform 0.75s var(--ease-out);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.32s; }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 22px 24px; }
+      nav.scrolled { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex !important; opacity: 1 !important; pointer-events: all !important; transform: none !important; }
+      .nav-logo { opacity: 1 !important; transform: none !important; }
+
+      #about { padding: 80px 24px; }
+      .about-grid { grid-template-columns: 1fr; gap: 48px; }
+      .about-photo-stack { aspect-ratio: 4/5; max-width: 500px; margin: 0 auto; }
+
+      .section-header { padding: 0 24px; flex-direction: column; align-items: flex-start; gap: 8px; }
+      .portfolio-track { padding: 0 24px 40px; }
+      .drag-hint { padding: 0 24px; }
+
+      #contact { padding: 80px 24px; }
+      .contact-grid { grid-template-columns: 1fr; gap: 56px; }
+      .form-row { grid-template-columns: 1fr; }
+
+      footer { padding: 24px; flex-direction: column; gap: 12px; text-align: center; }
+
+      #testimonials { padding: 80px 24px; }
+    }
+
+    @media (max-width: 600px) {
+      .hero-headline { font-size: clamp(3.2rem, 18vw, 5rem); }
+      .about-stat-row { gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ NAVIGATION ═══════════════════════════════════════════════════════ -->
+  <nav id="main-nav">
+    <div class="nav-logo">Sawyer & Co</div>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#portfolio" data-label="Work"><span>Work</span></a></li>
+      <li><a href="#about" data-label="About"><span>About</span></a></li>
+      <li><a href="#contact" data-label="Contact"><span>Contact</span></a></li>
+    </ul>
+    <button class="nav-hamburger" id="hamburger" aria-label="Open menu">
+      <div class="hamburger-lines">
+        <span></span>
+        <span></span>
+      </div>
+      Menu
+    </button>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="menu-overlay" id="menu-overlay" role="dialog" aria-modal="true">
+    <a href="#portfolio" class="menu-link">Work</a>
+    <a href="#about" class="menu-link">About</a>
+    <a href="#contact" class="menu-link">Contact</a>
+  </div>
+
+  <!-- Single morphing wordmark — lives outside all sections, fixed to viewport -->
+  <a href="#hero" class="wordmark" id="wordmark" aria-label="Sawyer & Co — return to top">Sawyer &amp; Co.</a>
+
+  <!-- ═══ HERO ══════════════════════════════════════════════════════════════ -->
+  <section class="chapter" id="hero">
+    <div class="hero-bg" id="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800&q=85')"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">— Hospitality Photography</p>
+      <!-- Wordmark is the fixed morphing element above — not repeated here -->
+      <p class="hero-sub" style="margin-top: 56px;">North West England &nbsp;·&nbsp; Restaurants &amp; Cafes &nbsp;·&nbsp; Jacob Sawyer</p>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- ═══ PORTFOLIO ════════════════════════════════════════════════════════ -->
+  <section class="chapter" id="portfolio">
+    <div class="section-header">
+      <div>
+        <p class="section-label reveal">Selected work</p>
+        <h2 class="section-title reveal reveal-delay-1">The <em>work</em></h2>
+      </div>
+      <div class="portfolio-count reveal reveal-delay-2">08</div>
+    </div>
+
+    <div class="portfolio-track-wrapper" id="track-wrapper">
+      <div class="portfolio-track" id="portfolio-track">
+
+        <div class="portfolio-item">
+          <img class="portfolio-img" src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=85" alt="Restaurant interior" loading="lazy" draggable="false">
+          <div class="portfolio-caption">
+            <p class="portfolio-caption-label">Interiors</p>
+            <p class="portfolio-caption-name">The Cricketers</p>
+          </div>
+        </div>
+
+        <!-- Jay's actual images loaded via JS below -->
+        <div class="portfolio-item" data-src="jay-1">
+          <img class="portfolio-img" src="" alt="Fine dining plate" loading="lazy" draggable="false">
+          <div class="portfolio-caption">
+            <p class="portfolio-caption-label">Fine dining</p>
+            <p class="portfolio-caption-name">24 Chapel Street</p>
+          </div>
+        </div>
+
+        <div class="portfolio-item" data-src="jay-2">
+          <img class="portfolio-img" src="" alt="Smoked salmon gravlax" loading="lazy" draggable="false">
+          <div class="portfolio-caption">
+            <p class="portfolio-caption-label">Plated</p>
+            <p class="portfolio-caption-name">Salmon Gravlax</p>
+          </div>
+        </div>
+
+        <div class="portfolio-item" data-src="jay-3">
+          <img class="portfolio-img" src="" alt="Christmas dinner plate" loading="lazy" draggable="false">
+          <div class="portfolio-caption">
+            <p class="portfolio-caption-label">Seasonal</p>
+            <p class="portfolio-caption-name">Winter Menu</p>
+          </div>
+        </div>
+
+        <div class="portfolio-item" data-src="jay-4">
+          <img class="portfolio-img" src="" alt="Heirloom tomato dish" loading="lazy" draggable="false">
+          <div class="portfolio-caption">
+            <p class="portfolio-caption-label">Plated</p>
+            <p class="portfolio-caption-name">Heritage Tomato</p>
+          </div>
+        </div>
+
+        <div class="portfolio-item" data-src="jay-5">
+          <img class="portfolio-img" src="" alt="Coffee bar" loading="lazy" draggable="false">
+          <div class="portfolio-caption">
+            <p class="portfolio-caption-label">Cafe</p>
+            <p class="portfolio-caption-name">Neighbourhood</p>
+          </div>
+        </div>
+
+        <div class="portfolio-item" data-src="jay-6">
+          <img class="portfolio-img" src="" alt="Espresso machine" loading="lazy" draggable="false">
+          <div class="portfolio-caption">
+            <p class="portfolio-caption-label">Detail</p>
+            <p class="portfolio-caption-name">La Marzocco</p>
+          </div>
+        </div>
+
+        <div class="portfolio-item" data-src="jay-7">
+          <img class="portfolio-img" src="" alt="Wine and candlelight" loading="lazy" draggable="false">
+          <div class="portfolio-caption">
+            <p class="portfolio-caption-label">Ambience</p>
+            <p class="portfolio-caption-name">Biferno Rosso</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="drag-hint reveal">
+      <div class="drag-hint-line"></div>
+      <span>Drag to explore</span>
+    </div>
+  </section>
+
+  <!-- ═══ ABOUT ════════════════════════════════════════════════════════════ -->
+  <section class="chapter" id="about">
+    <div class="about-grid">
+
+      <div class="about-photo-stack" id="photo-stack">
+        <!-- Back photo: Jay at work (atmospheric) -->
+        <img class="photo-back" src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?w=900&q=85" alt="Jay Sawyer at work" loading="lazy">
+        <!-- Front photo: Jay portrait — hover reveals the back -->
+        <img class="photo-front" id="photo-front" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=85" alt="Jacob Sawyer, photographer" loading="lazy">
+        <div class="photo-mask-overlay" id="photo-mask-overlay"></div>
+        <p class="about-photo-label">Hover to reveal</p>
+      </div>
+
+      <div class="about-text">
+        <p class="section-label reveal">About Jacob</p>
+        <h2 class="about-title reveal reveal-delay-1">Photography for<br>restaurants worth<br><em>remembering.</em></h2>
+        <p class="about-body reveal reveal-delay-2">Jacob Sawyer is a hospitality photographer based in the North West of England. Working with independent restaurants, cafes, and bars, he specialises in capturing the atmosphere that keeps guests coming back — the light, the craft, the character.</p>
+        <p class="about-body reveal reveal-delay-3">Every venue has a story. Jacob's job is to tell it — honestly, atmospherically, and in a way that makes someone reach for a reservation.</p>
+
+        <div class="about-stat-row reveal">
+          <div class="about-stat">
+            <div class="about-stat-num">6+</div>
+            <div class="about-stat-label">Years shooting hospitality</div>
+          </div>
+          <div class="about-stat">
+            <div class="about-stat-num">40+</div>
+            <div class="about-stat-label">Venues photographed</div>
+          </div>
+          <div class="about-stat">
+            <div class="about-stat-num">NW</div>
+            <div class="about-stat-label">England based</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ TESTIMONIALS ═════════════════════════════════════════════════════ -->
+  <section class="chapter" id="testimonials">
+    <div class="testimonials-inner">
+      <p class="section-label reveal" style="text-align:center; margin-bottom: 56px;">What clients say</p>
+      <blockquote class="testimonial-quote reveal">
+        Jacob captured something in our dining room that we'd never been able to put into words — now we don't have to. Every image he made for us filled a booking within hours of going live.
+      </blockquote>
+      <p class="testimonial-author reveal reveal-delay-1">The Cricketers</p>
+      <p class="testimonial-venue reveal reveal-delay-2">Cheshire, North West England</p>
+    </div>
+  </section>
+
+  <!-- ═══ CONTACT ══════════════════════════════════════════════════════════ -->
+  <section class="chapter" id="contact">
+    <div class="contact-grid">
+      <div class="contact-left">
+        <p class="section-label reveal">Get in touch</p>
+        <h2 class="contact-title reveal reveal-delay-1">I'd like to hear<br>from you.</h2>
+        <p class="contact-body reveal reveal-delay-2">If you have any enquiries or just want to say hi, please use the contact form.</p>
+        <div class="contact-detail reveal reveal-delay-3">
+          <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+          <a href="mailto:hello@sawyerandco.com">hello@sawyerandco.com</a>
+        </div>
+        <div class="contact-detail reveal">
+          <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          <a href="https://instagram.com/sawyerandcophotography" target="_blank">@sawyerandcophotography</a>
+        </div>
+      </div>
+
+      <div class="contact-form reveal reveal-delay-1">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="first-name">First Name</label>
+            <input type="text" id="first-name" placeholder="John" autocomplete="given-name">
+          </div>
+          <div class="form-field">
+            <label for="last-name">Last Name</label>
+            <input type="text" id="last-name" placeholder="Smith" autocomplete="family-name">
+          </div>
+        </div>
+        <div class="form-field" style="margin-bottom: 14px;">
+          <label for="email">Email <span style="color: var(--accent)">*</span></label>
+          <input type="email" id="email" placeholder="you@email.com" autocomplete="email">
+        </div>
+        <div class="form-field" style="margin-bottom: 0;">
+          <label for="message">Message</label>
+          <textarea id="message" placeholder="Tell me a little about what you're making…"></textarea>
+        </div>
+        <button class="form-submit" type="button">Send</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══════════════════════════════════════════════════════════ -->
+  <footer>
+    <div class="footer-brand">Sawyer & Co</div>
+    <div class="footer-copy">© 2026 Jacob Sawyer · All rights reserved</div>
+    <div class="footer-designed">Website by wearekern</div>
+  </footer>
+
+  <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════════ -->
+  <script>
+    /* ── MORPHING WORDMARK ── */
+    const wordmark = document.getElementById('wordmark');
+    const nav      = document.getElementById('main-nav');
+    const navLinks = document.getElementById('nav-links');
+    const hamburger = document.getElementById('hamburger');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    // Measure where the wordmark needs to START (hero centre)
+    // and END (top-left nav logo slot).
+    // We use two ghost elements as anchors.
+    const heroAnchor = document.getElementById('hero');
+    const navAnchor  = document.querySelector('.nav-logo'); // invisible placeholder
+
+    // Font sizes: hero large → nav small
+    const SIZE_START = window.innerWidth < 600 ? 48 : 88;  // px, hero
+    const SIZE_END   = 16.8;                                // px, nav
+
+    function getStartPos() {
+      // Centre of hero viewport
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      // Text is roughly centred at hero-headline level
+      // We approximate: 52% down, horizontally centred
+      return {
+        x: vw / 2,
+        y: vh * 0.52,
+      };
+    }
+
+    function getEndPos() {
+      const rect = navAnchor.getBoundingClientRect();
+      return {
+        x: rect.left,
+        y: rect.top + rect.height / 2,
+      };
+    }
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    // Clamp scroll progress 0→1 over the hero section height
+    function getScrollProgress() {
+      const heroH = heroAnchor.offsetHeight;
+      // Transition completes by 70% of hero scroll
+      const progress = window.scrollY / (heroH * 0.68);
+      return Math.min(Math.max(progress, 0), 1);
+    }
+
+    // Easing: ease-in-out cubic
+    function easeInOut(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    let ticking = false;
+
+    function updateWordmark() {
+      const rawT = getScrollProgress();
+      const t = easeInOut(rawT);
+
+      const start = getStartPos();
+      const end   = getEndPos();
+
+      const currentSize = lerp(SIZE_START, SIZE_END, t);
+      const currentX    = lerp(start.x, end.x, t);
+      const currentY    = lerp(start.y, end.y, t);
+
+      // At start: centred (translate -50% -50%), at end: left-aligned (translate 0 -50%)
+      // We interpolate the X offset from -50% width to 0
+      const halfWidth = wordmark.offsetWidth / 2;
+      const xOffset   = lerp(-halfWidth, 0, t);
+      const yOffset   = -currentSize / 2; // always vertically centred on its own midline
+
+      wordmark.style.left     = `${currentX + xOffset}px`;
+      wordmark.style.top      = `${currentY + yOffset}px`;
+      wordmark.style.fontSize = `${currentSize}px`;
+
+      // Letter-spacing: loose in hero, tighter in nav
+      const lsStart = -0.025;
+      const lsEnd   = 0.07;
+      wordmark.style.letterSpacing = `${lerp(lsStart, lsEnd, t)}em`;
+
+      // Weight feel: lighter in hero, slightly more present in nav
+      // Cormorant only has 300/400/500 so we switch at midpoint
+      wordmark.style.fontWeight = t > 0.6 ? '400' : '300';
+
+      // Opacity: fully visible throughout, but fade hero text behind it
+      wordmark.style.opacity = rawT === 0 ? '0' : '1'; // hide until first scroll tick
+
+      // Make it clickable only once it's settled in the nav position
+      wordmark.classList.toggle('interactive', t > 0.85);
+
+      // Nav state
+      const pastHero = rawT >= 1;
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+      navLinks.classList.toggle('hidden', rawT > 0.5);
+      hamburger.classList.toggle('visible', rawT > 0.5);
+
+      ticking = false;
+    }
+
+    // Initial position before any scroll
+    function initWordmark() {
+      const start = getStartPos();
+      const halfWidth = wordmark.offsetWidth / 2;
+      wordmark.style.fontSize     = `${SIZE_START}px`;
+      wordmark.style.left         = `${start.x - halfWidth}px`;
+      wordmark.style.top          = `${start.y - SIZE_START / 2}px`;
+      wordmark.style.letterSpacing = '-0.025em';
+      wordmark.style.fontWeight   = '300';
+      wordmark.style.opacity      = '1';
+    }
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(updateWordmark);
+        ticking = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener('resize', () => {
+      if (window.scrollY < 10) initWordmark();
+    });
+
+    // Init on load (after fonts render)
+    document.fonts.ready.then(() => {
+      initWordmark();
+    });
+
+    hamburger.addEventListener('click', () => {
+      const open = menuOverlay.classList.toggle('open');
+      document.body.style.overflow = open ? 'hidden' : '';
+    });
+
+    menuOverlay.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        menuOverlay.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+
+    /* ── HORIZONTAL DRAG SCROLL ── */
+    const track = document.getElementById('portfolio-track');
+    let isDown = false, startX, scrollLeft;
+
+    track.addEventListener('mousedown', e => {
+      isDown = true;
+      track.style.cursor = 'grabbing';
+      startX = e.pageX - track.offsetLeft;
+      scrollLeft = track.scrollLeft;
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDown = false;
+      track.style.cursor = 'grab';
+    });
+
+    track.addEventListener('mouseleave', () => { isDown = false; });
+
+    track.addEventListener('mousemove', e => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - track.offsetLeft;
+      const walk = (x - startX) * 1.4;
+      track.scrollLeft = scrollLeft - walk;
+    });
+
+    /* ── ABOUT: mouse-tracked mask reveal ── */
+    const stack = document.getElementById('photo-stack');
+    const photoFront = stack.querySelector('.photo-front');
+
+    stack.addEventListener('mousemove', e => {
+      const rect = stack.getBoundingClientRect();
+      const mx = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+      const my = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+      stack.style.setProperty('--mx', `${mx}%`);
+      stack.style.setProperty('--my', `${my}%`);
+    });
+
+    /* ── SCROLL REVEAL ── */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(el => {
+        if (el.isIntersecting) {
+          el.target.classList.add('visible');
+          revealObserver.unobserve(el.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    /* ── SMOOTH CHAPTER TRANSITIONS via snap-scroll feel ── */
+    // Passive scroll listener for chapter transitions
+    const chapters = document.querySelectorAll('.chapter');
+
+    /* ── PORTFOLIO: load Jay's images ── */
+    // In production these would be real image URLs.
+    // For demo purposes using Unsplash proxies that match Jay's photo style.
+    const jayImages = [
+      { selector: '[data-src="jay-1"]', url: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=900&q=85', },
+      { selector: '[data-src="jay-2"]', url: 'https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=900&q=85', },
+      { selector: '[data-src="jay-3"]', url: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=900&q=85', },
+      { selector: '[data-src="jay-4"]', url: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=900&q=85', },
+      { selector: '[data-src="jay-5"]', url: 'https://images.unsplash.com/photo-1442975631134-7b1c50f4b9f2?w=900&q=85', },
+      { selector: '[data-src="jay-6"]', url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=85', },
+      { selector: '[data-src="jay-7"]', url: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=900&q=85', },
+    ];
+
+    jayImages.forEach(({ selector, url }) => {
+      const item = document.querySelector(selector);
+      if (item) item.querySelector('.portfolio-img').src = url;
+    });
+
+    /* ── SMOOTH SECTION TRANSITIONS ── */
+    // Each section fades into the next via scroll position
+    // The surface/bg gradient transition is handled in CSS already.
+    // Here we add a subtle parallax to the hero bg.
+    const heroBg = document.getElementById('hero-bg');
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      if (y < window.innerHeight) {
+        heroBg.style.transform = `translateY(${y * 0.35}px) scale(1.08)`;
+      }
+    }, { passive: true });
+
+    /* ── FORM: basic send interaction ── */
+    document.querySelector('.form-submit').addEventListener('click', function() {
+      const email = document.getElementById('email').value.trim();
+      const message = document.getElementById('message').value.trim();
+      if (!email || !message) {
+        this.textContent = 'Fill in email & message';
+        setTimeout(() => this.textContent = 'Send', 2000);
+        return;
+      }
+      this.textContent = 'Sent ✓';
+      this.style.background = 'var(--accent)';
+      this.style.color = 'var(--text)';
+    });
+  </script>
+
+</body>
+</html>
